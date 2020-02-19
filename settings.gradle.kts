@@ -9,4 +9,10 @@ pluginManagement {
 }
 rootProject.name = "unix-katas-kotlin"
 
-include("lib-test", "true", "false", "echo")
+include(
+        "lib-test",
+        "true",
+        "false",
+        "echo",
+        "cat"
+)
