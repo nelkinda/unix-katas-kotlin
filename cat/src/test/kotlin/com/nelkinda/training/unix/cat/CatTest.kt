@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertAll
 class CatTest {
     @Test
     fun `cat from empty stdin prints nothing`() {
-        val result = intercept(Runnable { main() })
+        val result = intercept { main() }
         assertAll(
                 { result.assertStderrEmpty() },
                 { result.assertStdoutEmpty() },
@@ -17,7 +17,7 @@ class CatTest {
 
     @Test
     fun `cat from stdin prints its contents`() {
-        val result = intercept("foo", Runnable { main() })
+        val result = intercept("foo") { main() }
         assertAll(
                 { result.assertStderrEmpty() },
                 { result.assertStdout("foo") },
@@ -27,7 +27,7 @@ class CatTest {
 
     @Test
     fun `cat from a file prints that file`() {
-        val result = intercept(Runnable { main(testFile("input1.txt")) })
+        val result = intercept { main(testFile("input1.txt")) }
         assertAll(
                 { result.assertStderrEmpty() },
                 { result.assertStdout("File Input 1\n") },
@@ -37,7 +37,7 @@ class CatTest {
 
     @Test
     fun `cat from multiple files concatenates those files`() {
-        val result = intercept(Runnable { main(testFile("input1.txt"), testFile("input2.txt")) })
+        val result = intercept { main(testFile("input1.txt"), testFile("input2.txt")) }
         assertAll(
                 { result.assertStderrEmpty() },
                 { result.assertStdout("File Input 1\nFile Input 2\n") },
@@ -47,7 +47,7 @@ class CatTest {
 
     @Test
     fun `cat with a non-existent file prints an error message`() {
-        val result = intercept(Runnable { main("non-existent-file") })
+        val result = intercept { main("non-existent-file") }
         assertAll(
                 { result.assertStderrFormat("cat: non-existent-file (No such file or directory)%n") },
                 { result.assertStdoutEmpty() },
@@ -57,7 +57,7 @@ class CatTest {
 
     @Test
     fun `cat with mixed existing and non-existing files concatenates the existing files and prints all errors`() {
-        val result = intercept(Runnable { main("non-existent-1", testFile("input1.txt"), "non-existent-2", testFile("input2.txt"), "non-existent-3") })
+        val result = intercept { main("non-existent-1", testFile("input1.txt"), "non-existent-2", testFile("input2.txt"), "non-existent-3") }
         assertAll(
                 { result.assertStderrFormat(
                         "cat: non-existent-1 (No such file or directory)%n" +

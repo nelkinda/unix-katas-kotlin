@@ -7,11 +7,11 @@ import org.junit.jupiter.api.assertAll
 class FalseTest {
     @Test
     fun `false does nothing, unsuccessfully`() {
-        val result = intercept("", Runnable {main()})
+        val result = intercept { main() }
         assertAll(
-                {result.assertStatus(1)},
-                {result.assertStderrEmpty()},
-                {result.assertStdoutEmpty()}
+                { result.assertStatus(1) },
+                { result.assertStderrEmpty() },
+                { result.assertStdoutEmpty() }
         )
     }
 }

@@ -7,11 +7,11 @@ import org.junit.jupiter.api.assertAll
 class TrueTest {
     @Test
     fun `true does nothing, successfully`() {
-        val result = intercept("", Runnable {main()})
+        val result = intercept { main() }
         assertAll(
-                {result.assertStatus(0)},
-                {result.assertStderrEmpty()},
-                {result.assertStdoutEmpty()}
+                { result.assertStatus(0) },
+                { result.assertStderrEmpty() },
+                { result.assertStdoutEmpty() }
         )
     }
 }

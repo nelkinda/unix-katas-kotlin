@@ -7,32 +7,16 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.PrintStream
 import java.nio.charset.Charset
-import java.util.concurrent.Callable
 
-fun intercept(runnable: Runnable): InterceptionResult<Void?> {
+fun intercept(runnable: () -> Unit): InterceptionResult {
     return intercept("", runnable)
 }
 
-fun <T> intercept(callable: Callable<T>): InterceptionResult<T> {
-    return intercept("", callable)
-}
-
-fun intercept(stdin: String, runnable: Runnable): InterceptionResult<Void?> {
+fun intercept(stdin: String, runnable: () -> Unit): InterceptionResult {
     return intercept(ByteArrayInputStream(stdin.toByteArray()), runnable)
 }
 
-fun <T> intercept(stdin: String, callable: Callable<T>): InterceptionResult<T> {
-    return intercept(ByteArrayInputStream(stdin.toByteArray()), callable)
-}
-
-fun intercept(stdin: InputStream, runnable: Runnable): InterceptionResult<Void?> {
-    return intercept(stdin, Callable<Void?> {
-        runnable.run()
-        null
-    })
-}
-
-fun <T> intercept(stdin: InputStream, callable: Callable<T>): InterceptionResult<T> {
+fun intercept(stdin: InputStream, runnable: () -> Unit): InterceptionResult {
     val originalStdin = System.`in`
     val originalStdout = System.out
     val originalStderr = System.err
@@ -40,14 +24,13 @@ fun <T> intercept(stdin: InputStream, callable: Callable<T>): InterceptionResult
     val redirectedStderr = ByteArrayOutputStream()
     val redirectedStdout = ByteArrayOutputStream()
     val newSecurityManager = ExitInterceptingSecurityManager(originalSecurityManager)
-    var result: T? = null
     var throwable: Throwable? = null
     try {
         System.setIn(stdin)
         System.setOut(PrintStream(redirectedStdout))
         System.setErr(PrintStream(redirectedStderr))
         System.setSecurityManager(newSecurityManager)
-        result = callable.call()
+        runnable.invoke()
     } catch (ignore: ExitException) {
         // ignored here, taken from the security manager
     } catch (e: Throwable) {
@@ -58,15 +41,14 @@ fun <T> intercept(stdin: InputStream, callable: Callable<T>): InterceptionResult
         System.setErr(originalStderr)
         System.setSecurityManager(originalSecurityManager)
     }
-    return InterceptionResult(redirectedStdout.toByteArray(), redirectedStderr.toByteArray(), newSecurityManager.status, throwable, result)
+    return InterceptionResult(redirectedStdout.toByteArray(), redirectedStderr.toByteArray(), newSecurityManager.status, throwable)
 }
 
-data class InterceptionResult<T>(
+data class InterceptionResult(
         private val stdout: ByteArray,
         private val stderr: ByteArray,
         private val status: Int?,
-        private val exception: Throwable?,
-        val result: T?
+        private val exception: Throwable?
 ) {
 
     fun assertStdoutEmpty() {

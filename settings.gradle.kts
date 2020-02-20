@@ -14,5 +14,6 @@ include(
         "true",
         "false",
         "echo",
-        "cat"
+        "cat",
+        "head"
 )
